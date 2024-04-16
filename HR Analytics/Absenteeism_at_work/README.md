@@ -11,11 +11,11 @@ Welcome to the Absenteeism at Work project! Here, I've analyzed patterns of abse
 
 ## Aim
 
-The aim of this project is to analyze absenteeism at work and identify factors contributing to employee absences. By leveraging SQL, Excel, and Power BI, I explore the dataset to understand trends, patterns, and potential solutions for reducing absenteeism.
+This project aims to analyze absenteeism at work and identify factors contributing to employee absences. By leveraging SQL, Excel, and Power BI, I explore the dataset to understand trends, patterns, and potential solutions for reducing absenteeism.
 
 ## Data Source
 
-The data for this project is sourced from [provide data source here], containing records of employee absences along with reasons, duration, and other relevant information.
+The data for this project is sourced from [UC Irvine Machine Learning Repository](https://archive.ics.uci.edu/dataset/445/absenteeism+at+work), containing records of employee absences along with reasons, duration, and other relevant information.
 
 ## Analysis Overview
 
