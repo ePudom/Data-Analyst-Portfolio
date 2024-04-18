@@ -1,90 +1,169 @@
-select count(*) from pizza_sales;
+select * 
+from pizzas;
 
-select count(distinct pizza_id)
-from pizza_sales;
+select count(*) from order_details;
 
-select distinct(datepart(year, order_date))
-from pizza_sales;
+select count(distinct order_details_id) 
+from order_details;
 
-select distinct(datepart(month, order_date))
-from pizza_sales
+select count(*) from orders;
+
+select * 
+from pizza_types;
+
+select * 
+from pizzas;
+
+select distinct datepart(year, date)
+from orders;
+
+select distinct datepart(month, date)
+from orders
 order by 1;
 
---KPI
---Total Revenue
-select cast(sum(total_price) as decimal(10,2)) as total_revenue
-from pizza_sales;
 
---Average Order Value
-select cast((sum(total_price) / count(distinct order_id)) as decimal(10,2)) as avg_order_value
-from pizza_sales;
+-- KPI
+-- Total Revenue
+select cast(sum(d.quantity * p.price) as decimal(10,2)) as total_revenue
+from order_details d, pizzas p
+where d.pizza_id = p.pizza_id
 
---Total Pizzas Sold
+-- Average Order Value
+select count(*)
+from orders;
+
+select cast(
+	cast(sum(p.price * d.quantity) as float)/count(distinct o.order_id) as decimal(10,2)
+) as avg_order_value
+from orders o, pizzas p, order_details d
+where d.order_id = o.order_id
+and d.pizza_id = p.pizza_id;
+
+-- Total Pizzas Sold
 select sum(quantity) as total_pizza_sold
-from pizza_sales;
+from order_details;
 
---Total Orders
-select count(distinct order_id) as total_orders
-from pizza_sales;
+-- Total Orders
+select count(order_id) as total_orders
+from orders;
 
---Average Pizzas per Order 
-select cast(sum(quantity) / cast(count(distinct order_id) as decimal(10,2)) as decimal(10,2)) as avg_pizza_per_order
-from pizza_sales;
+-- Average Pizzas per Order
+select d.order_id, count(d.pizza_id)
+from pizzas p, order_details d 
+where d.pizza_id = p.pizza_id
+group by d.order_id
 
---CHART REQUIREMENTS
---Daily trends for Total Order
-select datename(dw, order_date) as order_day, sum(quantity) as no_of_orders
-from pizza_sales
-group by datename(dw, order_date)
+select cast(
+	cast(sum(quantity) as float)/count(distinct order_id) as decimal(10,2)
+) as avg_pizza_per_order
+from order_details;
+
+-- Requirement
+-- Daily trends for Total Order
+select datename(dw, date) as order_day, 
+sum(d.quantity) as no_of_orders
+from orders o, order_details d
+where d.order_id = o.order_id
+group by datename(dw, date)
 order by 1;
 
---Hourly trends for Total Order
-select datepart(hour, order_time) as hour, sum(quantity) as no_of_orders 
-from pizza_sales
-group by datepart(hour, order_time)
+
+-- Hourly trends for Total Order
+select datepart(hour, o.time) as order_hour, 
+sum(d.quantity) as no_of_orders
+from orders o, order_details d
+where d.order_id = o.order_id
+group by datepart(hour, time)
 order by 1;
 
---Percentage sales per Pizza Category
-select pizza_category, cast(sum(total_price) as decimal(10,2)) as total_sales,
-cast((sum(total_price)/(select sum(total_price) from pizza_sales)) * 100 as decimal(10,2)) as percentage_sales
-from pizza_sales
-group by pizza_category;
+-- Percentage sales per Pizza Category
+with total_sales as (
+	select sum(p.price * d.quantity) as total
+	from pizzas p, order_details d
+	where p.pizza_id = d.pizza_id
+)
+select y.category as pizza_category, cast(sum(p.price * d.quantity) as decimal(10,2)) as total_sales,
+cast(
+	cast(
+		sum(p.price * d.quantity) as float
+	)/(select total from total_sales) * 100 as decimal(10,2)
+) as percentage_sales
+from pizzas p, pizza_types y, order_details d
+where p.pizza_id = d.pizza_id
+and p.pizza_type_id = y.pizza_type_id
+group by y.category;
 
---Percentage sales per Pizza Size
-select pizza_size, cast(sum(total_price) as decimal(10,2)) as total_sales,
-cast((sum(total_price)/(select sum(total_price) from pizza_sales)) * 100 as decimal(10,2)) as percentage_sales
-from pizza_sales
-group by pizza_size
-order by 3;
-
---Percentage sales per Pizza Size per quarter
-select pizza_size, cast(sum(total_price) as decimal(10,2)) as total_sales, 
-cast((sum(total_price)/(
-	select sum(total_price) 
-	from pizza_sales 
-	where datepart(quarter, order_date) = 3
-)) * 100 as decimal(10,2)) as percentage_sales
-from pizza_sales
-where datepart(quarter, order_date) = 3
-group by pizza_size
-order by 3;
-
---Total Pizza sold by Category
-select pizza_category, sum(quantity) as total_pizza_sold
-from pizza_sales
-group by pizza_category;
-
---Top best sellers by Pizzas sold
-select top 5
-pizza_name, sum(quantity) as total_sold
-from pizza_sales
-group by pizza_name
-order by 2 desc;
-
---Bottom worst sellers by Pizzas sold
-select top 5
-pizza_name, sum(quantity) as total_sold
-from pizza_sales
-group by pizza_name
+-- Percentage sales per Pizza Size
+with total_sales as (
+	select sum(p.price * d.quantity) as total
+	from pizzas p, order_details d
+	where p.pizza_id = d.pizza_id
+)
+select p.size as pizza_size, cast(sum(p.price * d.quantity) as decimal(10,2)) as total_sales,
+cast(
+	cast(
+		sum(p.price * d.quantity) as float
+	)/(select total from total_sales) * 100 as decimal(10,2)
+)  as percentage_sales
+from pizzas p, order_details d
+where p.pizza_id = d.pizza_id
+group by p.size
 order by 2;
 
+-- Percentage sales per size in the 3rd quarter
+with total_sales as (
+	select sum(p.price * d.quantity) as total
+	from pizzas p, order_details d, orders o
+	where p.pizza_id = d.pizza_id
+	and d.order_id = o.order_id
+	and datepart(quarter, o.date) = 3
+)
+select p.size, cast(sum(p.price * d.quantity) as decimal(10,2)) as total_sales,
+cast(
+	cast(
+		sum(p.price * d.quantity) as float
+	)/(select total from total_sales) * 100 as decimal(10,2)
+)  as percentage_sales
+from pizzas p, order_details d, orders o
+where d.pizza_id = p.pizza_id
+and d.order_id = o.order_id
+and datepart(quarter, o.date) = 3
+group by p.size
+order by 3;
+
+-- Total pizzas per category
+select y.category as pizza_category, sum(d.quantity) as total_pizza_sold
+from pizza_types y, pizzas p, order_details d
+where d.pizza_id = p.pizza_id
+and p.pizza_type_id = y.pizza_type_id
+group by y.category
+
+-- Top best sellers by Pizzas sold
+select top 5 y.name as pizza_name, 
+sum(d.quantity) as total_sales
+from pizzas p, pizza_types y, order_details d
+where p.pizza_id = d.pizza_id
+and p.pizza_type_id = y.pizza_type_id  
+group by y.name
+order by 2 desc;
+
+-- Bottom worst sellers by Pizzas sold
+select top 5 y.name as pizza_name, 
+sum(d.quantity) as total_sales
+from pizzas p, pizza_types y, order_details d
+where p.pizza_id = d.pizza_id
+and p.pizza_type_id = y.pizza_type_id  
+group by y.name
+order by 2;
+
+
+-- Data to be exported for further analysis
+select d.order_details_id as pizza_id, o.order_id, p.pizza_id as pizza_name_id, 
+d.quantity, o.date as order_date, convert(varchar, o.time, 24) as order_time, p.price as unit_price, 
+(p.price * d.quantity) as total_price, p.size as pizza_size, y.category as pizza_category, 
+y.ingredients as pizza_ingredients, y.name as pizza_name
+from pizzas p, pizza_types y, order_details d, orders o
+where p.pizza_type_id = y.pizza_type_id
+and d.order_id = o.order_id
+and d.pizza_id = p.pizza_id
+order by d.order_details_id;
