@@ -11,7 +11,7 @@ Welcome to the Pizza Sales Analysis project! Here, I embark on a flavorful journ
 
 ## Aim
 
-The primary objective of this project is to conduct a comprehensive analysis of pizza sales data, delving deep into the nuances of customer behavior and market trends.
+The primary objective of this project is to conduct a comprehensive analysis of pizza sales data, delving deep into the nuances of customer behaviour and market trends.
 
 ## Data Source
 
@@ -22,7 +22,7 @@ The data used in this project is [Pizza Place Sales](https://www.kaggle.com/data
 In my quest for insights, I employ a multifaceted approach that harnesses the power of both SQL and Excel. 
 
 ### SQL Exploration 
-I kickstart my journey with SQL to explore, preprocess and wrangle the raw data into a format conducive to analysis. Through a series of intricate queries, I sift through the data, unraveling intricate patterns and extracting nuggets of wisdom hidden within.
+I kickstart my journey with SQL to explore, preprocess and wrangle the raw data into a format conducive to analysis. Through a series of intricate queries, I sift through the data, unravelling intricate patterns and extracting nuggets of wisdom hidden within.
 
 ### Excel Analysis
 With my data primed and ready, I transition to Excel, where I embark on a voyage of discovery, armed with pivot tables, charts, and formulas. Here, I delve into the finer details of customer preferences, dissecting popular toppings, dissecting peak ordering times, and uncovering emerging trends that illuminate the path to pizza-selling success.
@@ -39,5 +39,5 @@ This project repository is organized as follows:
 - **`dashboard_wireframe.pptx`**: A PowerPoint file that contains the background image of the final dashboard.
 - **`README.md`**: You're perusing it right now - a gateway to my project's essence and aspirations.
 
-Dive into the depths of my project repository to discover the secrets that lie within. Be sure to give your observation and feedback. Thank you :smiling-face:.
+Dive into the depths of my project repository to discover the secrets that lie within. Be sure to give your observation and feedback. Thank you :).
 
